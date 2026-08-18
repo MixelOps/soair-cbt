@@ -30,4 +30,15 @@ export class CandidatesService {
     if (error) throw error;
     return data;
   }
+
+  async findAll() {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('candidates')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
 }
