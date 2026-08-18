@@ -10,5 +10,9 @@ export class SignupDto {
 
   @IsString()
   @MinLength(2)
-  fullName!: string;
+  firstName!: string;
+
+  @IsString()
+  @MinLength(2)
+  lastName!: string;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StepIndicator } from "../../components/StepIndicator";
 import { PassportUpload } from "../../components/PassportUpload";
+import { useAuthStore } from "../../store/authStore";
 
 type FormData = {
   fullName: string;
@@ -57,6 +58,7 @@ export function RegistrationForm() {
     stored ? { ...initialData, ...stored.data } : initialData
   );
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [candidateNo] = useState(() => `2026${Math.floor(1000 + Math.random() * 9000)}`);
 
   useEffect(() => {
@@ -82,9 +84,34 @@ export function RegistrationForm() {
   const next = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
   const back = () => setCurrentStep((s) => Math.max(s - 1, 0));
 
-  const handleSubmit = () => {
-    sessionStorage.removeItem(STORAGE_KEY);
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    setSubmitError("");
+    const token = useAuthStore.getState().token;
+    try {
+      const res = await fetch("http://localhost:3000/candidates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fullName: data.fullName,
+          phone: data.phone,
+          dob: data.dob,
+          gender: data.gender,
+          state: data.state,
+          examBody: data.examBody === "other" ? data.examBodyOther : data.examBody,
+          examSubject: data.examSubject,
+          preferredDate: data.preferredDate,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Submission failed");
+      sessionStorage.removeItem(STORAGE_KEY);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong");
+    }
   };
 
   if (submitted) {
@@ -206,6 +233,8 @@ export function RegistrationForm() {
             </dl>
           </div>
         )}
+
+        {submitError && <p className="mt-6 text-sm text-red-500">{submitError}</p>}
 
         <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
           <button

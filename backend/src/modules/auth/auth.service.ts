@@ -14,8 +14,8 @@ export class AuthService {
     const { data, error } = await client.auth.admin.createUser({
       email: dto.email,
       password: dto.password,
-      email_confirm: true, // skip email verification for now, MVP stage
-      user_metadata: { fullName: dto.fullName },
+      email_confirm: true,
+      user_metadata: { firstName: dto.firstName, lastName: dto.lastName },
       app_metadata: { role: Role.CANDIDATE },
     });
 
@@ -44,6 +44,7 @@ export class AuthService {
         id: data.user.id,
         email: data.user.email,
         role: data.user.app_metadata?.role,
+        firstName: data.user.user_metadata?.firstName,
       },
     };
   }

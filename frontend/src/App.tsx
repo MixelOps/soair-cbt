@@ -5,6 +5,9 @@ import Services from './pages/public/Services'
 import ExamCalendar from './pages/public/ExamCalendar'
 import Contact from './pages/public/Contact'
 import Register from './pages/public/Register'
+import Login from './pages/public/Login'
+import Signup from './pages/public/Signup'
+import { RequireAuth } from './components/RequireAuth'
 import './App.css'
 
 function App() {
@@ -15,7 +18,9 @@ function App() {
       <Route path="/services" element={<Services />} />
       <Route path="/calendar" element={<ExamCalendar />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<RequireAuth><Register /></RequireAuth>} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
     </Routes>
   )
 }
