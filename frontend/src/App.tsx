@@ -8,6 +8,7 @@ import Register from './pages/public/Register'
 import Login from './pages/public/Login'
 import Signup from './pages/public/Signup'
 import Dashboard from './pages/admin/Dashboard'
+import Candidates from './pages/admin/Candidates'
 import { RequireAuth } from './components/RequireAuth'
 import { RequireRole } from './components/RequireRole'
 import './App.css'
@@ -23,7 +24,8 @@ function App() {
       <Route path="/register" element={<RequireAuth><Register /></RequireAuth>} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/admin" element={<RequireRole roles={["super_admin", "administrator", "examination_officer"]}><Dashboard /></RequireRole>} />
+            <Route path="/admin" element={<RequireRole roles={["super_admin", "administrator", "examination_officer"]}><Dashboard /></RequireRole>} />
+      <Route path="/admin/candidates" element={<RequireRole roles={["super_admin", "administrator", "examination_officer"]}><Candidates /></RequireRole>} />
     </Routes>
   )
 }

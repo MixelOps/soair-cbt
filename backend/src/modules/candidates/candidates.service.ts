@@ -41,4 +41,17 @@ export class CandidatesService {
     if (error) throw error;
     return data;
   }
+
+  async updateStatus(id: string, status: string) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('candidates')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 }

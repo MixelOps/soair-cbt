@@ -26,9 +26,11 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
+            if (!res.ok) throw new Error(data.message || "Login failed");
       setAuth(data.accessToken, data.user);
-      navigate("/");
+
+      const adminRoles = ["super_admin", "administrator", "examination_officer"];
+      navigate(adminRoles.includes(data.user.role) ? "/admin" : "/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

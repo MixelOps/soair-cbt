@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { CandidatesService } from './candidates.service.js';
 import { CreateCandidateDto } from './dto/create-candidate.dto.js';
+import { UpdateStatusDto } from './dto/update-status.dto.js';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -23,5 +24,12 @@ export class CandidatesController {
   @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR, Role.EXAMINATION_OFFICER)
   findAll() {
     return this.candidatesService.findAll();
+  }
+
+  @Patch(':id/status')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR, Role.EXAMINATION_OFFICER)
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
+    return this.candidatesService.updateStatus(id, dto.status);
   }
 }
