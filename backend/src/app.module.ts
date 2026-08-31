@@ -5,7 +5,7 @@ import { AppService } from './app.service.js';
 import { SupabaseModule } from './modules/supabase/supabase.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CandidatesModule } from './modules/candidates/candidates.module.js';
-
+import { SessionsModule } from './modules/exams/sessions/sessions.module.js';
 
 @Module({
   imports: [
@@ -15,6 +15,7 @@ import { CandidatesModule } from './modules/candidates/candidates.module.js';
     SupabaseModule,
     AuthModule,
     CandidatesModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

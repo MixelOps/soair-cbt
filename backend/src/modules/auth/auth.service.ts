@@ -3,6 +3,7 @@ import { SupabaseService } from '../supabase/supabase.service.js';
 import { Role } from '../../common/types/role.enum.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
+import { CreateStaffDto } from './dto/create-staff.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -47,5 +48,23 @@ export class AuthService {
         firstName: data.user.user_metadata?.firstName,
       },
     };
+  }
+
+  async createStaff(dto: CreateStaffDto) {
+    const client = this.supabaseService.getClient();
+
+    const { data, error } = await client.auth.admin.createUser({
+      email: dto.email,
+      password: dto.password,
+      email_confirm: true,
+      user_metadata: { firstName: dto.firstName, lastName: dto.lastName },
+      app_metadata: { role: dto.role },
+    });
+
+    if (error) {
+      throw new UnauthorizedException(error.message);
+    }
+
+    return { userId: data.user.id, email: data.user.email, role: dto.role };
   }
 }
