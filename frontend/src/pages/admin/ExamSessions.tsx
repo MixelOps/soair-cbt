@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { AdminLayout } from "../../components/layout/AdminLayout";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 type Session = {
   id: string;
@@ -8,6 +9,13 @@ type Session = {
   exam_subject: string;
   session_date: string;
   capacity: number;
+};
+
+type Candidate = {
+  id: string;
+  full_name: string;
+  candidate_no: string;
+  status: string;
 };
 
 const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[var(--color-signal)] focus:outline-none";
@@ -21,6 +29,8 @@ export default function ExamSessions() {
   const [sessionDate, setSessionDate] = useState("");
   const [capacity, setCapacity] = useState(50);
   const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [candidatesBySession, setCandidatesBySession] = useState<Record<string, Candidate[]>>({});
 
   const token = useAuthStore.getState().token;
 
@@ -29,12 +39,8 @@ export default function ExamSessions() {
     fetch("http://localhost:3000/sessions", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load sessions");
-        setSessions(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : "Something went wrong"))
+      .then((res) => res.json())
+      .then((d) => setSessions(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false));
   };
 
@@ -55,6 +61,33 @@ export default function ExamSessions() {
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+    }
+  };
+
+  const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const res = await fetch(`http://localhost:3000/sessions/${deleteTarget.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setDeleteTarget(null);
+    if (res.ok) load();
+  };
+
+  const toggleExpand = async (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(id);
+    if (!candidatesBySession[id]) {
+      const res = await fetch(`http://localhost:3000/sessions/${id}/candidates`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setCandidatesBySession((prev) => ({ ...prev, [id]: Array.isArray(data) ? data : [] }));
     }
   };
 
@@ -99,23 +132,63 @@ export default function ExamSessions() {
                 <th className="px-4 py-3">Exam</th>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Capacity</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {sessions.map((s) => (
-                <tr key={s.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3">{s.exam_body} — {s.exam_subject}</td>
-                  <td className="px-4 py-3">{s.session_date}</td>
-                  <td className="px-4 py-3">{s.capacity}</td>
-                </tr>
+                <>
+                  <tr key={s.id} className="border-t border-slate-100">
+                    <td className="px-4 py-3">{s.exam_body} — {s.exam_subject}</td>
+                    <td className="px-4 py-3">{s.session_date}</td>
+                    <td className="px-4 py-3">{s.capacity}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => toggleExpand(s.id)} className="mr-3 text-xs font-medium text-[var(--color-signal)]">
+                        {expandedId === s.id ? "Hide" : "View"} candidates
+                      </button>
+                      <button onClick={() => setDeleteTarget(s)} className="text-xs font-medium text-red-500">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                  {expandedId === s.id && (
+                    <tr>
+                      <td colSpan={4} className="bg-slate-50 px-4 py-3">
+                        {!candidatesBySession[s.id] && <p className="text-xs text-[var(--color-slate)]">Loading...</p>}
+                        {candidatesBySession[s.id]?.length === 0 && (
+                          <p className="text-xs text-[var(--color-slate)]">No candidates registered for this session yet.</p>
+                        )}
+                        {candidatesBySession[s.id] && candidatesBySession[s.id].length > 0 && (
+                          <ul className="space-y-1">
+                            {candidatesBySession[s.id].map((c) => (
+                              <li key={c.id} className="flex justify-between text-xs">
+                                <span className="font-medium text-[var(--color-ink)]">{c.full_name}</span>
+                                <span className="font-mono text-[var(--color-signal)]">{c.candidate_no}</span>
+                                <span className="capitalize text-[var(--color-slate)]">{c.status.replace("_", " ")}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
               {!loading && sessions.length === 0 && (
-                <tr><td colSpan={3} className="px-4 py-8 text-center text-[var(--color-slate)]">No sessions scheduled yet.</td></tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-[var(--color-slate)]">No sessions scheduled yet.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+                    <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete exam session"
+        message={deleteTarget ? `Delete the ${deleteTarget.exam_body.toUpperCase()} — ${deleteTarget.exam_subject} session on ${deleteTarget.session_date}? This cannot be undone.` : ""}
+        confirmLabel="Delete session"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </AdminLayout>
   );
 }

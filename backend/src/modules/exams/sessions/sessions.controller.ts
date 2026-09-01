@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { SessionsService } from './sessions.service.js';
 import { CreateSessionDto } from './dto/create-session.dto.js';
 import { SupabaseAuthGuard } from '../../../common/guards/supabase-auth.guard.js';
@@ -21,5 +21,19 @@ export class SessionsController {
   @UseGuards(SupabaseAuthGuard)
   findAll() {
     return this.sessionsService.findAll();
+  }
+
+  @Get(':id/candidates')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR, Role.EXAMINATION_OFFICER)
+  findCandidates(@Param('id') id: string) {
+    return this.sessionsService.findCandidates(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR)
+  delete(@Param('id') id: string) {
+    return this.sessionsService.delete(id);
   }
 }

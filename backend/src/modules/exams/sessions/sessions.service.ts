@@ -33,4 +33,23 @@ export class SessionsService {
     if (error) throw error;
     return data;
   }
+
+  async delete(id: string) {
+    const client = this.supabaseService.getClient();
+    const { error } = await client.from('exam_sessions').delete().eq('id', id);
+    if (error) throw error;
+    return { deleted: true };
+  }
+
+  async findCandidates(id: string) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
+      .from('candidates')
+      .select('*')
+      .eq('session_id', id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  }
 }

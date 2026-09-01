@@ -6,6 +6,7 @@ import { SupabaseModule } from './modules/supabase/supabase.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CandidatesModule } from './modules/candidates/candidates.module.js';
 import { SessionsModule } from './modules/exams/sessions/sessions.module.js';
+import { WorkstationsModule } from './modules/workstations/workstations.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SessionsModule } from './modules/exams/sessions/sessions.module.js';
     AuthModule,
     CandidatesModule,
     SessionsModule,
+    WorkstationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
