@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service.js';
 import { Role } from '../../common/types/role.enum.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { CreateStaffDto } from './dto/create-staff.dto.js';
+import { RefreshDto } from './dto/refresh.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -27,13 +28,20 @@ export class AuthService {
     return { userId: data.user.id, email: data.user.email };
   }
 
-  async login(dto: LoginDto) {
+    async login(dto: LoginDto) {
     const client = this.supabaseService.getClient();
 
-    const { data, error } = await client.auth.signInWithPassword({
-      email: dto.email,
-      password: dto.password,
-    });
+    let data, error;
+    try {
+      const result = await client.auth.signInWithPassword({
+        email: dto.email,
+        password: dto.password,
+      });
+      data = result.data;
+      error = result.error;
+    } catch {
+      throw new ServiceUnavailableException('Unable to reach authentication service. Please try again.');
+    }
 
     if (error || !data.session) {
       throw new UnauthorizedException('Invalid email or password');
@@ -41,6 +49,7 @@ export class AuthService {
 
     return {
       accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
       user: {
         id: data.user.id,
         email: data.user.email,
@@ -66,5 +75,25 @@ export class AuthService {
     }
 
     return { userId: data.user.id, email: data.user.email, role: dto.role };
+  }
+
+  async refresh(dto: RefreshDto) {
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client.auth.refreshSession({ refresh_token: dto.refreshToken });
+
+    if (error || !data.session) {
+      throw new UnauthorizedException('Session could not be refreshed');
+    }
+
+    return {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      user: {
+        id: data.user!.id,
+        email: data.user!.email,
+        role: data.user!.app_metadata?.role,
+        firstName: data.user!.user_metadata?.firstName,
+      },
+    };
   }
 }

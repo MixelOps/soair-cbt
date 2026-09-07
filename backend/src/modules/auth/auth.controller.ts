@@ -7,6 +7,7 @@ import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../common/types/role.enum.js';
+import { RefreshDto } from './dto/refresh.dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,11 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('refresh')
+  refresh(@Body() dto: RefreshDto) {
+    return this.authService.refresh(dto);
   }
 
   @Post('staff')

@@ -19,20 +19,32 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    let res: Response;
     try {
-      const res = await fetch("http://localhost:3000/auth/login", {
+      res = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+    } catch {
+      // fetch itself threw — this means the request never reached the server at all.
+      // Could be no internet, the backend being down, or a CORS/network-level block.
+           setError("We're having trouble connecting. Check your internet and try again.");
+      setLoading(false);
+      return;
+    }
+
+    try {
       const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Login failed");
-      setAuth(data.accessToken, data.user);
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
       const adminRoles = ["super_admin", "administrator", "examination_officer"];
+      setAuth(data.accessToken, data.user, data.refreshToken);
       navigate(adminRoles.includes(data.user.role) ? "/admin" : "/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      // this path means the server WAS reached and responded — so this is a real auth error
+      setError(err instanceof Error ? err.message : "Invalid email or password");
     } finally {
       setLoading(false);
     }

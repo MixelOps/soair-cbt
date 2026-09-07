@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import type { Request } from 'express';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { CandidatesService } from './candidates.service.js';
 import { CreateCandidateDto } from './dto/create-candidate.dto.js';
 import { UpdateStatusDto } from './dto/update-status.dto.js';
@@ -31,5 +31,17 @@ export class CandidatesController {
   @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR, Role.EXAMINATION_OFFICER)
   updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
     return this.candidatesService.updateStatus(id, dto.status);
+  }
+
+  @Get('export/excel')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMINISTRATOR, Role.EXAMINATION_OFFICER)
+  async exportExcel(@Query('sessionId') sessionId: string | undefined, @Res() res: Response) {
+    const buffer = await this.candidatesService.exportToExcel(sessionId);
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="candidates.xlsx"',
+    });
+    res.send(buffer);
   }
 }

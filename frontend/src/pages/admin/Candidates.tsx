@@ -72,12 +72,31 @@ export default function Candidates() {
           <h1 className="font-display text-2xl font-semibold text-[var(--color-ink)]">Candidates</h1>
           <p className="mt-1 text-sm text-[var(--color-slate)]">{candidates.length} total registrations</p>
         </div>
-        <input
-          placeholder="Search by name or candidate no."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-72 rounded-md border border-slate-300 px-4 py-2 text-sm focus:border-[var(--color-signal)] focus:outline-none"
-        />
+                <div className="flex items-center gap-3">
+          <input
+            placeholder="Search by name or candidate no."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-72 rounded-md border border-slate-300 px-4 py-2 text-sm focus:border-[var(--color-signal)] focus:outline-none"
+          />
+          <button
+            onClick={async () => {
+              const res = await fetch("http://localhost:3000/candidates/export/excel", {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "candidates.xlsx";
+              a.click();
+              window.URL.revokeObjectURL(url);
+            }}
+            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:bg-slate-50"
+          >
+            Export to Excel
+          </button>
+        </div>
       </div>
 
       {loading && <p className="mt-6 text-sm text-[var(--color-slate)]">Loading...</p>}

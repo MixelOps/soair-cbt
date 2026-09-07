@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import ExcelJS from 'exceljs';
 import { SupabaseService } from '../supabase/supabase.service.js';
 import { CreateCandidateDto } from './dto/create-candidate.dto.js';
 
@@ -77,5 +78,53 @@ export class CandidatesService {
 
     if (error) throw error;
     return data;
+  }
+
+  async exportToExcel(sessionId?: string): Promise<Buffer> {
+    const client = this.supabaseService.getClient();
+    let query = client.from('candidates').select('*').order('full_name', { ascending: true });
+
+    if (sessionId) {
+      query = query.eq('session_id', sessionId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Candidates');
+
+    sheet.columns = [
+      { header: 'Candidate No.', key: 'candidate_no', width: 16 },
+      { header: 'Full Name', key: 'full_name', width: 28 },
+      { header: 'Phone', key: 'phone', width: 16 },
+      { header: 'Gender', key: 'gender', width: 10 },
+      { header: 'State', key: 'state', width: 16 },
+      { header: 'Exam Body', key: 'exam_body', width: 14 },
+      { header: 'Subject', key: 'exam_subject', width: 20 },
+      { header: 'Exam Date', key: 'preferred_date', width: 14 },
+      { header: 'Status', key: 'status', width: 18 },
+      { header: 'Registered', key: 'created_at', width: 20 },
+    ];
+
+    sheet.getRow(1).font = { bold: true };
+
+    for (const c of data ?? []) {
+      sheet.addRow({
+        candidate_no: c.candidate_no,
+        full_name: c.full_name,
+        phone: c.phone,
+        gender: c.gender,
+        state: c.state,
+        exam_body: c.exam_body,
+        exam_subject: c.exam_subject,
+        preferred_date: c.preferred_date,
+        status: c.status,
+        created_at: new Date(c.created_at).toLocaleString(),
+      });
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(buffer);
   }
 }
