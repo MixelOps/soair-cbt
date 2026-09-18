@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { CandidatesModule } from './modules/candidates/candidates.module.js';
 import { SessionsModule } from './modules/exams/sessions/sessions.module.js';
 import { WorkstationsModule } from './modules/workstations/workstations.module.js';
+import { KioskModule } from './modules/kiosk/kiosk.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { WorkstationsModule } from './modules/workstations/workstations.module.j
     CandidatesModule,
     SessionsModule,
     WorkstationsModule,
+    KioskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

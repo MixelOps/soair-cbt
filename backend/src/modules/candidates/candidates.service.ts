@@ -3,6 +3,13 @@ import ExcelJS from 'exceljs';
 import { SupabaseService } from '../supabase/supabase.service.js';
 import { CreateCandidateDto } from './dto/create-candidate.dto.js';
 
+function generateAccessCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
 @Injectable()
 export class CandidatesService {
   constructor(private readonly supabaseService: SupabaseService) {}
@@ -32,6 +39,7 @@ export class CandidatesService {
     }
 
     const candidateNo = `2026${Math.floor(1000 + Math.random() * 9000)}`;
+    const accessCode = generateAccessCode();
 
     const { data, error } = await client
       .from('candidates')
@@ -47,6 +55,7 @@ export class CandidatesService {
         exam_subject: session.exam_subject,
         preferred_date: session.session_date,
         candidate_no: candidateNo,
+        access_code: accessCode,
         status: 'pending',
       })
       .select()

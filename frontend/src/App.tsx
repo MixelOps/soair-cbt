@@ -12,6 +12,7 @@ import Candidates from './pages/admin/Candidates'
 import Staff from './pages/admin/Staff'
 import ExamSessions from './pages/admin/ExamSessions'
 import Workstations from './pages/admin/Workstations'
+import Kiosk from './pages/kiosk/Kiosk'
 import { RequireAuth } from './components/RequireAuth'
 import { RequireRole } from './components/RequireRole'
 import './App.css'
@@ -34,6 +35,7 @@ function App() {
       <Route path="/admin/sessions" element={<RequireRole roles={adminRoles}><ExamSessions /></RequireRole>} />
       <Route path="/admin/workstations" element={<RequireRole roles={adminRoles}><Workstations /></RequireRole>} />
       <Route path="/admin/staff" element={<RequireRole roles={["super_admin"]}><Staff /></RequireRole>} />
+      <Route path="/kiosk" element={<Kiosk />} />
     </Routes>
   )
 }

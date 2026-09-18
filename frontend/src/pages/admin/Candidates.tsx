@@ -6,6 +6,7 @@ type Candidate = {
   id: string;
   full_name: string;
   candidate_no: string;
+  access_code: string;
   phone: string;
   exam_body: string;
   exam_subject: string;
@@ -72,7 +73,7 @@ export default function Candidates() {
           <h1 className="font-display text-2xl font-semibold text-[var(--color-ink)]">Candidates</h1>
           <p className="mt-1 text-sm text-[var(--color-slate)]">{candidates.length} total registrations</p>
         </div>
-                <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <input
             placeholder="Search by name or candidate no."
             value={search}
@@ -108,39 +109,30 @@ export default function Candidates() {
             <thead className="bg-slate-50 text-xs uppercase text-[var(--color-slate)]">
               <tr>
                 <th className="px-4 py-3">Candidate no.</th>
+                <th className="px-4 py-3">Access code</th>
                 <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Phone</th>
+                <th className="px-4 py-3">Gender</th>
+                <th className="px-4 py-3">State</th>
                 <th className="px-4 py-3">Exam</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Actions</th>
+                <th className="px-4 py-3">Preferred date</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((c) => (
                 <tr key={c.id} className="border-t border-slate-100 hover:bg-slate-50">
                   <td className="px-4 py-3 font-mono text-xs text-[var(--color-signal)]">{c.candidate_no}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-[var(--color-amber)]">{c.access_code}</td>
                   <td className="px-4 py-3 font-medium text-[var(--color-ink)]">{c.full_name}</td>
+                  <td className="px-4 py-3">{c.phone}</td>
+                  <td className="px-4 py-3 capitalize">{c.gender}</td>
+                  <td className="px-4 py-3">{c.state}</td>
                   <td className="px-4 py-3">{c.exam_body} — {c.exam_subject}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[c.status] ?? ""}`}>
-                      {c.status.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={c.status}
-                      onChange={(e) => updateStatus(c.id, e.target.value)}
-                      className="rounded-md border border-slate-300 px-2 py-1 text-xs"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="payment_confirmed">Payment confirmed</option>
-                      <option value="seat_assigned">Seat assigned</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </td>
+                  <td className="px-4 py-3">{c.preferred_date}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-[var(--color-slate)]">No matching candidates.</td></tr>
+                <tr><td colSpan={8} className="px-4 py-8 text-center text-[var(--color-slate)]">No matching candidates.</td></tr>
               )}
             </tbody>
           </table>
