@@ -103,7 +103,7 @@ export class CandidatesService {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Candidates');
 
-    sheet.columns = [
+        sheet.columns = [
       { header: 'Candidate No.', key: 'candidate_no', width: 16 },
       { header: 'Full Name', key: 'full_name', width: 28 },
       { header: 'Phone', key: 'phone', width: 16 },
@@ -113,6 +113,8 @@ export class CandidatesService {
       { header: 'Subject', key: 'exam_subject', width: 20 },
       { header: 'Exam Date', key: 'preferred_date', width: 14 },
       { header: 'Status', key: 'status', width: 18 },
+      { header: 'Exam Score (%)', key: 'score', width: 16 },
+      { header: 'Exam Completed', key: 'completed_at', width: 20 },
       { header: 'Registered', key: 'created_at', width: 20 },
     ];
 
@@ -129,6 +131,8 @@ export class CandidatesService {
         exam_subject: c.exam_subject,
         preferred_date: c.preferred_date,
         status: c.status,
+        score: c.score ?? 'Not taken',
+        completed_at: c.completed_at ? new Date(c.completed_at).toLocaleString() : '-',
         created_at: new Date(c.created_at).toLocaleString(),
       });
     }

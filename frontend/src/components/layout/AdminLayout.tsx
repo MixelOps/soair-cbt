@@ -7,6 +7,7 @@ const navItems = [
   { label: "Candidates", path: "/admin/candidates" },
   { label: "Exam sessions", path: "/admin/sessions" },
   { label: "Workstations", path: "/admin/workstations" },
+  { label: "Question bank", path: "/admin/questions" },
   { label: "Staff", path: "/admin/staff" },
 ];
 
